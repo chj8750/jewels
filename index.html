@@ -2,130 +2,574 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>앱인토스 보석 발굴 인터랙티브 목업</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>보석을 캐다</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{min-height:100vh;background:#eef2f8;font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Segoe UI",sans-serif;color:#171717;display:flex;align-items:center;justify-content:center;padding:28px}
-    button{font:inherit;border:0;cursor:pointer}
-    .wrap{width:1160px;display:grid;grid-template-columns:390px 1fr;gap:30px;align-items:start}
-    .phone{width:390px;height:844px;background:#dceeff;border:12px solid #151515;border-radius:42px;box-shadow:0 30px 80px rgba(0,0,0,.32);overflow:hidden;position:sticky;top:24px}
-    .screen{height:100%;display:none;flex-direction:column;position:relative;background:#dceeff}
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+    body{min-height:100vh;background:#0f0a1e;font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Segoe UI",sans-serif;display:flex;align-items:center;justify-content:center;padding:16px}
+    button{font:inherit;border:0;cursor:pointer;outline:0;background:0}
+    .phone{width:390px;height:844px;background:linear-gradient(180deg,#1b0c33 0%,#0e0522 100%);border:2px solid rgba(255,255,255,.06);border-radius:42px;box-shadow:0 30px 80px rgba(0,0,0,.7);overflow:hidden;position:relative}
+    .screen{height:100%;display:none;flex-direction:column;background:transparent}
     .screen.active{display:flex}
-    .status{height:34px;padding:9px 22px 0;display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:#151515}
-    .top{padding:8px 22px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .back{font-size:20px;font-weight:900}
-    .tiny{font-size:11px;color:#6b7280;font-weight:800}
-    .logo{font-size:29px;font-weight:1000;letter-spacing:-2.4px;line-height:.95;color:#fff;text-shadow:3px 3px 0 #111,-3px 3px 0 #111,3px -3px 0 #111,-3px -3px 0 #111,0 5px 0 #111;transform:rotate(-2deg)}
-    .logo b{color:#ffe238}.logo em{font-style:normal;color:#84c7ff}.logo.small{font-size:25px;text-align:center}
-    .bubble{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:18px;padding:9px 12px;font-size:12px;font-weight:900;box-shadow:0 5px 0 rgba(0,0,0,.06)}
-    .content{flex:1;padding:12px 22px 14px;display:flex;flex-direction:column;gap:9px}
-    .hero{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
-    .board{width:270px;height:185px;background:#fff;border-radius:32px;position:relative;box-shadow:0 18px 38px rgba(64,105,150,.2);transform:rotate(-4deg);overflow:hidden}
-    .board:before{content:"";position:absolute;inset:32px;background-image:radial-gradient(circle,#b9c3ce 2.5px,transparent 3px);background-size:34px 34px;background-position:0 0}
-    .gem{position:absolute;width:28px;height:28px;border-radius:50%;box-shadow:inset -5px -6px 0 rgba(0,0,0,.08),0 4px 0 rgba(0,0,0,.08)}
-    .g1{left:95px;top:78px;background:#ff73d8}.g2{left:139px;top:102px;background:#9a7bff}.g3{left:177px;top:72px;background:#78c7ff}.g4{left:212px;top:116px;background:#ffd85c}.g5{left:116px;top:138px;background:#ff8b8b}.g6{left:70px;top:126px;background:#8ce98b}
-    .char{position:absolute;width:66px;height:66px;border-radius:50%;bottom:-12px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;box-shadow:inset -8px -10px 0 rgba(0,0,0,.06)}
-    .pink{left:2px;background:#ff9bd8}.blue{right:-5px;background:#9fd5ff}.char:before{content:"•  •";position:absolute;top:19px;font-size:14px}.char:after{content:"⌣";position:absolute;top:31px;font-size:15px}
-    .ad-card{background:#fff;border-radius:20px;padding:12px;box-shadow:0 8px 0 rgba(0,0,0,.08);border:1px solid rgba(0,0,0,.08)}
-    .ad-title{font-size:12px;font-weight:1000;color:#6b7280;margin-bottom:8px;text-align:left}.ad-inner{height:58px;border-radius:16px;background:#191919;color:#fff;display:flex;align-items:center;justify-content:center;gap:12px;font-weight:1000}.ad-inner span{width:42px;height:42px;border-radius:12px;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;font-size:24px}
-    .primary{height:56px;border-radius:10px;background:#111;color:#fff;font-size:16px;font-weight:1000;box-shadow:0 5px 0 rgba(0,0,0,.2)}
-    .primary:disabled{background:#b7bec7;color:#fff;box-shadow:none;cursor:not-allowed}.ghost{height:48px;border-radius:10px;background:#fff;color:#111;border:1px solid rgba(0,0,0,.08);font-size:14px;font-weight:1000;box-shadow:0 4px 0 rgba(0,0,0,.06)}
-    .row{display:flex;gap:10px}.row>*{flex:1}
-    .progress-card{background:#fff;border-radius:20px;padding:12px;box-shadow:0 7px 0 rgba(0,0,0,.07)}
-    .progress-head{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:1000}.bar{height:12px;background:#e9edf3;border-radius:99px;margin-top:9px;overflow:hidden}.fill{height:100%;width:0%;background:linear-gradient(90deg,#ff78d8,#9b7bff,#76c8ff);border-radius:99px;transition:.25s}
-    .rock-stage{height:155px;display:flex;align-items:center;justify-content:center;position:relative}.rock{width:132px;height:104px;border-radius:48% 52% 44% 56%;background:linear-gradient(145deg,#bfc8d2,#7d8794);box-shadow:inset -20px -20px 24px rgba(0,0,0,.18),inset 16px 12px 20px rgba(255,255,255,.28),0 16px 0 rgba(0,0,0,.09);transform:scale(var(--stone-scale,1));transition:.25s}.rock:before{content:"";position:absolute;width:54px;height:12px;background:rgba(255,255,255,.35);border-radius:99px;transform:rotate(-18deg);margin:26px 0 0 34px}.crack{position:absolute;left:50%;top:54px;width:4px;height:100px;background:#111;opacity:var(--crack-opacity,0);clip-path:polygon(0 0,100% 0,40% 25%,100% 25%,15% 55%,100% 55%,30% 80%,80% 80%,0 100%)}
-    .hammer{position:absolute;top:4px;right:94px;font-size:48px;transform-origin:18px 52px}.hammer.hit{animation:hit .32s ease}@keyframes hit{0%{transform:rotate(-24deg)}55%{transform:rotate(24deg) translate(7px,10px)}100%{transform:rotate(-8deg)}}
-    .gem-reveal{background:#fff;border-radius:28px;padding:28px 18px;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.08)}.gem-icon{width:132px;height:132px;border-radius:50%;margin:0 auto 15px;display:flex;align-items:center;justify-content:center;font-size:70px;background:#f7fbff;box-shadow:inset 0 -8px 0 rgba(0,0,0,.05)}.gem-name{font-size:28px;font-weight:1000}.gem-value{font-size:17px;font-weight:1000;color:#ff56cc;margin-top:4px}
-    .ad{position:absolute;inset:0;background:rgba(20,20,20,.76);display:none;align-items:center;justify-content:center;padding:24px;z-index:6}.ad.show{display:flex}.ad-box{background:#fff;border-radius:26px;padding:24px;width:100%;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.2)}.ad-timer{width:88px;height:88px;border-radius:50%;margin:16px auto;background:conic-gradient(#ff72d7 var(--ad-progress),#eef2f8 0);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:1000;color:#111}
-    .wallet-head{background:#fff;border-radius:22px;padding:14px;box-shadow:0 7px 0 rgba(0,0,0,.07)}.amount{font-size:26px;font-weight:1000;margin-top:4px}.goal{font-size:12px;color:#6b7280;font-weight:800;margin-top:3px}.jewel-list{display:flex;flex-direction:column;gap:8px}.jewel{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:17px;padding:11px 13px;box-shadow:0 4px 0 rgba(0,0,0,.06)}.jewel-left{display:flex;align-items:center;gap:10px}.badge{width:39px;height:39px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;background:#f3f7ff}.jewel strong{display:block;font-size:14px}.jewel span{font-size:11px;color:#6b7280;font-weight:800}
-    .nav{height:64px;background:#fff;display:flex;align-items:center;justify-content:space-around;border-top:1px solid rgba(0,0,0,.08)}.nav button{background:transparent;color:#a0a6ae;font-size:11px;font-weight:1000;display:flex;flex-direction:column;gap:3px;align-items:center}.nav button.active{color:#111}.nav i{font-style:normal;font-size:22px}
-    .modal{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:23px;z-index:7}.modal.show{display:flex}.modal-card{background:#fff;border-radius:26px;padding:24px;width:100%;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.18)}.modal-card h2{font-size:26px;font-weight:1000}.modal-card p{font-size:14px;color:#666;margin:10px 0 18px;line-height:1.45}.burst{font-size:64px;margin-bottom:8px}.complete{background:#151515;color:#fff}.complete .sub{color:#d1d5db}
-    .panel{background:#fff;border:1px solid #dbe2ea;border-radius:28px;padding:24px;box-shadow:0 22px 70px rgba(15,23,42,.1)}.panel h1{font-size:28px;margin-bottom:8px}.panel p{color:#667085;line-height:1.55}.steps{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}.step{padding:16px;border-radius:20px;background:#f8fafc;border:1px solid #e5e7eb}.step strong{display:block;margin-bottom:6px}.step span{font-size:13px;color:#667085;line-height:1.45}.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.control{padding:11px 14px;border-radius:14px;background:#111;color:#fff;font-weight:900}.control.secondary{background:#e5f1ff;color:#111}.note{margin-top:20px;padding:16px;border-radius:18px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:14px;line-height:1.5}.toast{position:absolute;left:22px;right:22px;bottom:84px;background:#111;color:#fff;border-radius:16px;padding:13px 14px;font-size:13px;font-weight:900;display:none;z-index:8}.toast.show{display:block;animation:toast 2s ease forwards}@keyframes toast{0%{opacity:0;transform:translateY(10px)}12%,80%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(8px)}}
+
+    /* Status bar */
+    .st{height:44px;padding:12px 24px 0;display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:rgba(255,255,255,.65);flex-shrink:0}
+    .st-l{display:flex;gap:4px}
+    .st-r{display:flex;gap:4px;align-items:center}
+
+    /* Header */
+    .hd{padding:2px 20px 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .hd h1{font-size:20px;font-weight:900;color:#fff;letter-spacing:-.4px}
+    .hd-badge{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:5px 10px;font-size:11px;font-weight:700;color:rgba(255,255,255,.6)}
+
+    /* Content area */
+    .ct{flex:1;padding:6px 16px 10px;display:flex;flex-direction:column;overflow:hidden;gap:4px}
+
+    /* Game area - centered */
+    .ga{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:0;position:relative}
+
+    /* Rock+hammer container */
+    .rhc{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center;margin:0 auto}
+
+    /* Rock - organic shape */
+    .rk{width:156px;height:132px;position:relative;cursor:pointer;z-index:1}
+    .rk svg{width:100%;height:100%;overflow:visible}
+    .rk-bg{fill:url(#rockGrad);transition:all .15s;filter:drop-shadow(0 8px 24px rgba(0,0,0,.4))}
+    .rk-crk{stroke:#1a1a30;stroke-linecap:round;stroke-linejoin:round;fill:none;opacity:0;transition:opacity .25s}
+    .rk-crk.s1{stroke-width:2.5}
+    .rk-crk.s2{stroke-width:2}
+    .rk-crk.s3{stroke-width:2.2}
+    .rk-crk.s4{stroke-width:1.8}
+    .rk-crk.s5{stroke-width:2.3}
+
+    /* Impact ring */
+    .imp{position:absolute;left:50%;top:50%;width:0;height:0;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.35),transparent 70%);transform:translate(-50%,-50%);pointer-events:none;z-index:2;transition:none}
+    .imp.on{width:180px;height:180px;opacity:1;transition:none}
+    .imp.off{width:180px;height:180px;opacity:0;transition:opacity .25s}
+
+    /* Hammer */
+    .hmr{position:absolute;top:-18px;right:4px;z-index:3;pointer-events:none;transform-origin:18px 50px;transition:transform .06s;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+    .hmr svg{width:60px;height:68px;overflow:visible}
+    .hmr.swing{animation:swing .22s ease}
+    @keyframes swing{
+      0%{transform:rotate(0deg)}
+      35%{transform:rotate(32deg) translate(6px,4px)}
+      65%{transform:rotate(8deg) translate(2px,1px)}
+      100%{transform:rotate(0deg)}
+    }
+
+    /* Rock shake */
+    @keyframes rkshake{
+      0%,100%{transform:translate(0,0)}
+      20%{transform:translate(-2px,1px)}
+      40%{transform:translate(3px,-1px)}
+      60%{transform:translate(-1px,2px)}
+      80%{transform:translate(1px,-1px)}
+    }
+    .shk{animation:rkshake .12s ease}
+
+    /* Flying gems */
+    .f-gems{position:absolute;inset:-30px;pointer-events:none;z-index:0}
+    .fg{position:absolute;width:22px;height:22px;border-radius:5px;opacity:0;transform:translate(var(--fx),var(--fy)) rotate(var(--fr));transition:all .25s}
+    .fg.sh{opacity:1}
+    .fg.d{background:linear-gradient(135deg,#b8e6ff,#4fc3f7);box-shadow:0 0 14px rgba(79,195,247,.4)}
+    .fg.e{background:linear-gradient(135deg,#81c784,#388e3c);box-shadow:0 0 14px rgba(56,142,60,.4)}
+    .fg.r{background:linear-gradient(135deg,#ef9a9a,#d32f2f);box-shadow:0 0 14px rgba(211,47,47,.4)}
+    .fg.s{background:linear-gradient(135deg,#ce93d8,#7b1fa2);box-shadow:0 0 14px rgba(123,31,162,.4)}
+    .fg.g{background:linear-gradient(135deg,#fff176,#f9a825);box-shadow:0 0 14px rgba(249,168,37,.4)}
+
+    /* Particles */
+    .pt{position:absolute;inset:0;pointer-events:none;z-index:2}
+    @keyframes pfly{
+      0%{opacity:0;transform:translate(0,0) scale(0)}
+      20%{opacity:1}
+      100%{opacity:0;transform:translate(var(--px),var(--py)) scale(var(--ps))}
+    }
+
+    /* Rock info */
+    .ri{text-align:center}
+    .ri-l{font-size:12px;font-weight:700;color:rgba(255,255,255,.4);margin-bottom:2px;letter-spacing:.3px}
+    .ri-c{font-size:15px;font-weight:900;color:#fff}
+    .ri-c em{font-style:normal;color:#ffd54f}
+    .ri-d{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:4px}
+    .rd{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.04)}
+    .rd.d{background:#ffd54f;border-color:#ffd54f;box-shadow:0 0 6px rgba(255,213,79,.3)}
+    .rd.a{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.1)}
+
+    /* Durability bar */
+    .db{width:100%;margin-top:4px;padding:0 10px}
+    .db-bar{height:4px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
+    .db-fill{height:100%;width:0%;background:linear-gradient(90deg,#ffd54f,#ff9800);border-radius:99px;transition:width .18s}
+    .db-l{display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.2);font-weight:600;margin-top:3px;letter-spacing:.5px}
+
+    /* Gem shelf */
+    .gs{display:flex;justify-content:center;gap:18px;padding:2px 0 4px;flex-shrink:0}
+    .gs-it{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9px;font-weight:700;color:rgba(255,255,255,.3)}
+    .gs-ic{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;position:relative}
+    .gs-ic::after{content:"";position:absolute;inset:-1px;border-radius:8px;opacity:.25}
+    .gs-it.d .gs-ic{background:rgba(79,195,247,.1)}
+    .gs-it.d .gs-ic::after{border:1px solid #4fc3f7}
+    .gs-it.e .gs-ic{background:rgba(56,142,60,.1)}
+    .gs-it.e .gs-ic::after{border:1px solid #388e3c}
+    .gs-it.r .gs-ic{background:rgba(211,47,47,.1)}
+    .gs-it.r .gs-ic::after{border:1px solid #d32f2f}
+    .gs-it.s .gs-ic{background:rgba(123,31,162,.1)}
+    .gs-it.s .gs-ic::after{border:1px solid #7b1fa2}
+    .gs-it.g .gs-ic{background:rgba(249,168,37,.1)}
+    .gs-it.g .gs-ic::after{border:1px solid #f9a825}
+
+    /* CTA button */
+    .cta{width:100%;height:50px;border-radius:12px;background:linear-gradient(180deg,#ffd54f,#ffb300);color:#1a0a2e;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 5px 18px rgba(255,179,0,.25);transition:transform .08s;flex-shrink:0;position:relative;overflow:hidden}
+    .cta:active{transform:scale(.97)}
+    .cta:disabled{background:rgba(255,255,255,.06);color:rgba(255,255,255,.15);box-shadow:none;transform:none}
+    .ghost{width:100%;height:40px;border-radius:12px;background:transparent;color:rgba(255,255,255,.3);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;flex-shrink:0}
+
+    /* Bottom nav */
+    .nav{height:60px;display:flex;align-items:center;justify-content:space-around;border-top:1px solid rgba(255,255,255,.04);background:rgba(0,0,0,.15);flex-shrink:0}
+    .nav button{color:rgba(255,255,255,.25);font-size:9px;font-weight:800;display:flex;flex-direction:column;gap:1px;align-items:center;padding:4px 16px;border-radius:10px;transition:all .12s}
+    .nav button:active{background:rgba(255,255,255,.04)}
+    .nav button.act{color:#ffd54f}
+    .nav button.act i{text-shadow:0 0 12px rgba(255,213,79,.3)}
+    .nav button i{font-style:normal;font-size:20px;display:block}
+
+    /* Result screen */
+    .r-h{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:0 24px}
+    .r-g{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;background:rgba(255,255,255,.02);border:1.5px solid rgba(255,255,255,.05);position:relative}
+    .r-g::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(255,255,255,.03)}
+    .r-n{font-size:22px;font-weight:900;color:#fff}
+    .r-v{font-size:15px;font-weight:800;color:#ffd54f}
+    .r-hint{font-size:11px;color:rgba(255,255,255,.28);margin-top:4px;line-height:1.4;font-weight:600}
+
+    /* Ad overlay */
+    .ad{position:absolute;inset:0;background:rgba(0,0,0,.72);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:40px 32px;backdrop-filter:blur(2px)}
+    .ad.s{display:flex}
+    .ad-bx{text-align:center}
+    .ad-bx h2{font-size:16px;font-weight:900;margin-bottom:18px;color:#fff}
+    .ad-tm{width:72px;height:72px;border-radius:50%;margin:0 auto 18px;background:conic-gradient(#ffd54f var(--ap,0%),rgba(255,255,255,.06) 0%);display:flex;align-items:center;justify-content:center;position:relative}
+    .ad-tm::before{content:"";position:absolute;inset:3px;border-radius:50%;background:#0d0520}
+    .ad-tm span{position:relative;z-index:1;font-size:24px;font-weight:900;color:#ffd54f}
+    .ad-bx p{font-size:12px;color:rgba(255,255,255,.35);font-weight:600}
+
+    /* Wallet */
+    .ws{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:18px;padding:16px;margin-bottom:8px;flex-shrink:0}
+    .ws-l{font-size:10px;color:rgba(255,255,255,.3);font-weight:700;margin-bottom:3px}
+    .ws-v{font-size:26px;font-weight:900;color:#fff}
+    .ws-v em{font-style:normal;color:#ffd54f}
+    .ws-g{font-size:11px;color:rgba(255,255,255,.3);margin-top:5px;font-weight:600}
+    .ws-bar{height:4px;background:rgba(255,255,255,.04);border-radius:99px;margin-top:8px;overflow:hidden}
+    .ws-fl{height:100%;border-radius:99px;background:linear-gradient(90deg,#ffd54f,#ff9800);transition:width .25s}
+
+    .gl{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+    .gi{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.03)}
+    .gi-l{display:flex;align-items:center;gap:8px}
+    .gi-b{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px}
+    .gi-t strong{display:block;font-size:13px;font-weight:800;color:#fff}
+    .gi-t span{font-size:10px;color:rgba(255,255,255,.25);font-weight:600}
+    .gi-v{font-size:12px;font-weight:800;color:rgba(255,255,255,.35)}
+
+    /* Modal */
+    .md{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:28px;z-index:8;backdrop-filter:blur(3px)}
+    .md.s{display:flex}
+    .md-c{background:linear-gradient(180deg,#1d1136,#140a28);border:1px solid rgba(255,255,255,.06);border-radius:22px;padding:24px;text-align:center;width:100%;box-shadow:0 16px 48px rgba(0,0,0,.5)}
+    .md-c .burst{font-size:50px;margin-bottom:6px}
+    .md-c h2{font-size:20px;font-weight:900;color:#fff;margin-bottom:4px}
+    .md-c p{font-size:12px;color:rgba(255,255,255,.35);line-height:1.5;margin-bottom:18px;font-weight:600}
+
+    /* Complete */
+    .cp{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 28px;gap:8px}
+    .cp .big{font-size:56px}
+    .cp h2{font-size:24px;font-weight:900}
+    .cp p{font-size:13px;color:rgba(255,255,255,.35);font-weight:600;line-height:1.5}
+    .cp-s{font-size:17px;font-weight:800;color:rgba(255,255,255,.7)}
+
+    /* Toast */
+    .toast{position:absolute;left:16px;right:16px;bottom:78px;background:rgba(255,255,255,.08);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.04);border-radius:12px;padding:12px 14px;font-size:12px;font-weight:800;color:#fff;display:none;z-index:9;text-align:center}
+    .toast.s{display:block;animation:ti 2s ease forwards}
+    @keyframes ti{
+      0%{opacity:0;transform:translateY(10px)}
+      15%,78%{opacity:1;transform:translateY(0)}
+      100%{opacity:0;transform:translateY(-6px)}
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <main class="phone">
-      <section class="screen active" id="mine">
-        <div class="status"><span>9:41</span><span>●●● 100%</span></div>
-        <div class="top"><div><div class="tiny">앱인토스 리워드 게임</div><div class="logo"><em>보석</em>을<br><b>팡</b>캐기</div></div><div class="bubble">오늘 <b id="rocksLeft">5</b>개</div></div>
-        <div class="content">
-          <div class="hero">
-            <div class="board"><div class="gem g1"></div><div class="gem g2"></div><div class="gem g3"></div><div class="gem g4"></div><div class="gem g5"></div><div class="gem g6"></div><div class="char pink"></div><div class="char blue"></div></div>
-            <div class="ad-card"><div class="ad-title">광고 보고 보석 받기</div><div class="ad-inner"><span>💰</span>돌을 깨서 보석을 얻으세요!</div></div>
-          </div>
-          <div class="progress-card"><div class="progress-head"><span>돌 깨는 중</span><span id="progressText">0%</span></div><div class="bar"><div class="fill" id="fill"></div></div></div>
-          <div class="rock-stage"><div class="hammer" id="hammer">🔨</div><div class="rock" id="stone"></div><div class="crack"></div></div>
-          <button class="primary" id="tapBtn">게임 시작하기</button>
-          <div class="row"><button class="ghost" data-go="box">보석함</button><button class="ghost" id="resetBtn">다시하기</button></div>
-        </div>
-        <div class="nav"><button class="active" data-go="mine"><i>⛏️</i>발굴</button><button data-go="box"><i>💎</i>보석함</button><button data-go="settings"><i>⚙️</i>설정</button></div>
-        <div class="toast" id="toast"></div>
-      </section>
-      <section class="screen" id="result">
-        <div class="status"><span>9:41</span><span>●●● 100%</span></div>
-        <div class="top"><div class="back" data-go="mine">←</div><div class="logo small"><em>보석</em> 발견!</div><div></div></div>
-        <div class="content">
-          <div class="gem-reveal"><div class="gem-icon" id="resultEmoji">💎</div><div class="gem-name" id="resultName">다이아</div><div class="gem-value" id="resultValue">400만원</div><p class="goal">광고 시청 후 보석함에 저장돼요</p></div>
-          <button class="primary" id="receiveGem">보석받기</button><button class="ghost" data-go="mine">돌깨기로 돌아가기</button>
-        </div>
-        <div class="ad" id="gemAd"><div class="ad-box"><h2>광고 시청 중</h2><div class="ad-timer" id="gemAdTimer">3</div><p class="goal">끝까지 시청하면 보석이 저장됩니다.</p></div></div>
-      </section>
-      <section class="screen" id="box">
-        <div class="status"><span>9:41</span><span>●●● 100%</span></div>
-        <div class="top"><div><div class="tiny">내 보석함</div><div class="logo small"><em>보석</em> 지갑</div></div><div class="bubble">목표 1억원</div></div>
-        <div class="content">
-          <div class="wallet-head"><div class="tiny">누적 보석 가치</div><div class="amount" id="totalAmount">9,680만원</div><div class="goal" id="goalText">320만원 더 모으면 교환 가능</div><div class="bar"><div class="fill" id="totalBar"></div></div></div>
-          <div class="jewel-list" id="jewelList"></div>
-          <button class="primary" id="exchangeBtn">토스포인트로 교환하기</button><button class="ghost" data-go="mine">돌 더 깨러가기</button>
-        </div>
-        <div class="modal" id="goalModal"><div class="modal-card"><div class="burst">🎉</div><h2>1억원 달성!</h2><p>토스포인트 1,000원으로 바꾸기 전 광고를 한 번 시청해주세요.</p><button class="primary" id="modalExchange">지금 교환하기</button></div></div>
-        <div class="ad" id="exchangeAd"><div class="ad-box"><h2>교환 광고 시청 중</h2><div class="ad-timer" id="exchangeAdTimer">3</div><p class="goal">광고 완료 후 토스포인트 교환이 처리됩니다.</p></div></div>
-        <div class="nav"><button data-go="mine"><i>⛏️</i>발굴</button><button class="active" data-go="box"><i>💎</i>보석함</button><button data-go="settings"><i>⚙️</i>설정</button></div>
-      </section>
-      <section class="screen complete" id="complete">
-        <div class="status"><span>9:41</span><span>●●● 100%</span></div>
-        <div class="content" style="justify-content:center;text-align:center">
-          <div class="logo"><em>교환</em><br><b>완료!</b></div><p class="sub">토스포인트 1,000원 교환이 완료됐어요.</p>
-          <div class="gem-reveal"><div class="gem-icon">💎</div><div class="gem-name">기념 다이아 선물</div><div class="gem-value">다음 라운드를 시작해보세요</div></div>
-          <button class="primary" data-go="box">보석함 확인하기</button><button class="ghost" data-go="mine">계속하기</button>
-        </div>
-      </section>
-      <section class="screen" id="settings">
-        <div class="status"><span>9:41</span><span>●●● 100%</span></div>
-        <div class="top"><div><div class="tiny">운영 설정</div><div class="logo small"><em>밸런스</em> 설정</div></div></div>
-        <div class="content"><div class="jewel-list"><div class="jewel"><div><strong>하루 기본 돌</strong><span>5개</span></div><b>변경 가능</b></div><div class="jewel"><div><strong>교환 기준</strong><span>1억원 → 토스포인트 1,000원</span></div><b>변경 가능</b></div><div class="jewel"><div><strong>광고 위치</strong><span>보석받기 / 교환하기</span></div><b>변경 가능</b></div><div class="jewel"><div><strong>기념 보상</strong><span>다이아 1개</span></div><b>ON</b></div></div><button class="primary" data-go="mine">목업으로 돌아가기</button></div>
-        <div class="nav"><button data-go="mine"><i>⛏️</i>발굴</button><button data-go="box"><i>💎</i>보석함</button><button class="active" data-go="settings"><i>⚙️</i>설정</button></div>
-      </section>
-    </main>
-    <aside class="panel">
-      <h1>Figma 스타일 반영 목업</h1>
-      <p>Figma MCP 3845 포트는 열리지 않아 레이어 API는 못 붙었지만, 로그인된 Figma 화면을 직접 확인해 기존 게임 디자인 톤을 반영했습니다. 연한 하늘색 배경, 두꺼운 흰색/검정 테두리 로고, 핑크·블루 캐릭터, 흰색 카드와 검정 CTA 스타일로 재작업했습니다.</p>
-      <div class="steps"><div class="step"><strong>1. 발굴</strong><span>기존 가로세로 땅따먹기 톤과 맞춘 캐주얼 게임형 첫 화면</span></div><div class="step"><strong>2. 보석받기</strong><span>광고 시청 후 보석함 저장 플로우 유지</span></div><div class="step"><strong>3. 보석함</strong><span>1억원 진행률과 교환 CTA를 게임 스타일 카드로 정리</span></div><div class="step"><strong>4. 교환 완료</strong><span>토스포인트 교환 후 기념 보상까지 확인</span></div></div>
-      <div class="controls"><button class="control" onclick="demoGoal()">1억원 달성 상태 보기</button><button class="control secondary" onclick="go('mine')">처음부터 체험</button><button class="control secondary" onclick="go('settings')">운영 설정 보기</button></div>
-      <div class="note">정밀한 픽셀 매칭은 MCP/Export가 필요하지만, 현재 버전은 Figma 파일의 시각 톤을 기준으로 기존 파란 그라데이션 목업을 전면 교체한 버전입니다.</div>
-    </aside>
+
+<div class="phone">
+
+<!-- ========== MAIN MINE ========== -->
+<section class="screen active" id="mine">
+  <div class="st"><div class="st-l">9:41</div><div class="st-r"><span>●●●</span><span>100%</span></div></div>
+  <div class="hd">
+    <h1>보석을 캐다</h1>
+    <div class="hd-badge"><span>💰</span><span id="hdCoin">0</span></div>
   </div>
-  <script>
-    const gems=[{name:'다이아',emoji:'💎',value:400,rate:5},{name:'에메랄드',emoji:'🟢',value:250,rate:8},{name:'사파이어',emoji:'🔵',value:120,rate:17},{name:'루비',emoji:'🩷',value:50,rate:30},{name:'금',emoji:'🏆',value:20,rate:40}]
-    let progress=0, rocksLeft=5, total=9680, inventory={다이아:0,에메랄드:1,사파이어:3,루비:5,금:16}, pending=gems[4]
-    const $=id=>document.getElementById(id)
-    function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');if(id==='box')renderBox()}
-    function money(v){return v>=10000?`${Math.floor(v/10000)}억${v%10000?` ${(v%10000).toLocaleString()}만원`:''}`:`${v.toLocaleString()}만원`}
-    function pickGem(){let r=Math.random()*100,acc=0;for(const g of gems){acc+=g.rate;if(r<=acc)return g}return gems[4]}
-    function setProgress(v){progress=Math.min(100,v);$('progressText').textContent=`${progress}%`;$('fill').style.width=`${progress}%`;$('stone').style.setProperty('--stone-scale',1-progress/420);document.querySelectorAll('.crack').forEach(c=>c.style.setProperty('--crack-opacity',progress/100))}
-    function toast(t){$('toast').textContent=t;$('toast').classList.remove('show');void $('toast').offsetWidth;$('toast').classList.add('show')}
-    function renderBox(){const list=$('jewelList');list.innerHTML='';gems.forEach(g=>{const n=inventory[g.name]||0;const row=document.createElement('div');row.className='jewel';row.innerHTML=`<div class="jewel-left"><div class="badge">${g.emoji}</div><div><strong>${g.name} ${n}개</strong><span>${g.value}만원 · ${g.rate}%</span></div></div><b>${money(n*g.value)}</b>`;list.appendChild(row)});$('totalAmount').textContent=money(total);$('goalText').textContent=total>=10000?'교환 가능: 토스포인트 1,000원':`${money(10000-total)} 더 모으면 교환 가능`;$('totalBar').style.width=`${Math.min(100,total/10000*100)}%`;$('exchangeBtn').disabled=total<10000;if(total>=10000)setTimeout(()=>$('goalModal').classList.add('show'),280)}
-    function runAd(adId,timerId,next){$(adId).classList.add('show');let left=3;$(timerId).textContent=left;$(timerId).style.setProperty('--ad-progress','0%');const timer=setInterval(()=>{left--;$(timerId).textContent=Math.max(0,left);$(timerId).style.setProperty('--ad-progress',`${(3-left)/3*100}%`);if(left<=0){clearInterval(timer);$(adId).classList.remove('show');next()}},850)}
-    function demoGoal(){total=10080;renderBox();go('box')}
-    $('tapBtn').onclick=()=>{if(rocksLeft<=0){toast('오늘 깰 수 있는 돌을 모두 사용했어요');return}const h=$('hammer');h.classList.remove('hit');void h.offsetWidth;h.classList.add('hit');setProgress(progress+Math.floor(12+Math.random()*18));if(progress>=100){rocksLeft--;$('rocksLeft').textContent=rocksLeft;pending=pickGem();$('resultEmoji').textContent=pending.emoji;$('resultName').textContent=pending.name;$('resultValue').textContent=`${pending.value}만원`;setTimeout(()=>go('result'),450)}}
-    $('resetBtn').onclick=()=>{setProgress(0);toast('진행률이 초기화됐어요')}
-    $('receiveGem').onclick=()=>runAd('gemAd','gemAdTimer',()=>{inventory[pending.name]=(inventory[pending.name]||0)+1;total+=pending.value;setProgress(0);go('box');toast(`${pending.name}이 보석함에 저장됐어요`)})
-    $('exchangeBtn').onclick=()=>{$('goalModal').classList.add('show')}
-    $('modalExchange').onclick=()=>{$('goalModal').classList.remove('show');runAd('exchangeAd','exchangeAdTimer',()=>{if(total>=10000)total-=10000;inventory.다이아=(inventory.다이아||0)+1;go('complete')})}
-    document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go))
-    renderBox();setProgress(0)
-  </script>
+
+  <div class="ct">
+    <div class="ga">
+      <div class="rhc">
+        <!-- Rock SVG -->
+        <div class="rk" id="rk">
+          <svg viewBox="0 0 156 132">
+            <defs>
+              <linearGradient id="rockGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#8e99a8"/>
+                <stop offset="45%" stop-color="#5c6777"/>
+                <stop offset="100%" stop-color="#3a4250"/>
+              </linearGradient>
+            </defs>
+            <!-- Rock shape - organic irregular -->
+            <path class="rk-bg" d="M36 28 C48 16,72 14,86 22 C100 30,118 28,130 38 C142 48,144 68,138 84 C132 100,120 114,104 122 C88 130,66 128,50 120 C34 112,22 96,18 78 C14 60,24 40,36 28Z"/>
+            <!-- Rock texture dots -->
+            <circle cx="52" cy="48" r="3" fill="rgba(0,0,0,.04)"/>
+            <circle cx="70" cy="52" r="2.5" fill="rgba(0,0,0,.03)"/>
+            <circle cx="92" cy="42" r="2" fill="rgba(0,0,0,.04)"/>
+            <circle cx="108" cy="60" r="3" fill="rgba(0,0,0,.03)"/>
+            <circle cx="60" cy="80" r="2.5" fill="rgba(0,0,0,.03)"/>
+            <circle cx="100" cy="90" r="2" fill="rgba(0,0,0,.04)"/>
+            <circle cx="76" cy="96" r="3" fill="rgba(0,0,0,.03)"/>
+            <!-- Highlight -->
+            <ellipse cx="54" cy="42" rx="18" ry="8" fill="rgba(255,255,255,.06)" transform="rotate(-20 54 42)"/>
+            <!-- Cracks -->
+            <path class="rk-crk s1" d="M64 52 L74 64 L68 78 L82 90 L76 102" opacity="0"/>
+            <path class="rk-crk s2" d="M88 56 L96 76 L86 92 L94 108" opacity="0"/>
+            <path class="rk-crk s3" d="M52 72 L64 82 L56 96 L68 108" opacity="0"/>
+            <path class="rk-crk s4" d="M106 62 L100 82 L110 96 L102 112" opacity="0"/>
+            <path class="rk-crk s5" d="M42 86 L56 94 L48 106 L62 116" opacity="0"/>
+          </svg>
+          <div class="imp" id="imp"></div>
+        </div>
+
+        <!-- Hammer -->
+        <div class="hmr" id="hmr">
+          <svg viewBox="0 0 60 68">
+            <rect x="26" y="44" width="8" height="24" rx="2" fill="#8B6914" stroke="#6B4F10" stroke-width="1"/>
+            <rect x="24" y="62" width="12" height="6" rx="1.5" fill="#6B4F10"/>
+            <path d="M8 42 L52 42 L48 8 L12 8Z" fill="#7a7a7a" stroke="#5a5a5a" stroke-width="1.5"/>
+            <path d="M12 8 L18 20 L42 20 L48 8Z" fill="#929292"/>
+            <rect x="20" y="10" width="20" height="4" rx="1.5" fill="#666"/>
+          </svg>
+        </div>
+
+        <!-- Flying gems -->
+        <div class="f-gems" id="fg">
+          <div class="fg d" style="--fx:-50px;--fy:-55px;--fr:-20deg;top:30%;left:20%"></div>
+          <div class="fg e" style="--fx:45px;--fy:-65px;--fr:15deg;top:25%;left:55%"></div>
+          <div class="fg r" style="--fx:-20px;--fy:-80px;--fr:-35deg;top:15%;left:35%"></div>
+          <div class="fg s" style="--fx:65px;--fy:-35px;--fr:30deg;top:35%;left:60%"></div>
+          <div class="fg g" style="--fx:-70px;--fy:-30px;--fr:10deg;top:35%;left:15%"></div>
+        </div>
+
+        <!-- Particles container -->
+        <div class="pt" id="pt"></div>
+      </div>
+
+      <div class="ri">
+        <div class="ri-l">남은 돌</div>
+        <div class="ri-c">돌 <em id="cr">1</em> / <span id="tr">5</span></div>
+        <div class="ri-d" id="rd"></div>
+      </div>
+
+      <div class="db">
+        <div class="db-bar"><div class="db-fill" id="bf"></div></div>
+        <div class="db-l"><span>내구도</span><span id="bp">0%</span></div>
+      </div>
+    </div>
+
+    <div class="gs">
+      <div class="gs-it d"><div class="gs-ic">💎</div>다이아</div>
+      <div class="gs-it e"><div class="gs-ic">🟢</div>에메랄드</div>
+      <div class="gs-it r"><div class="gs-ic">❤️</div>루비</div>
+      <div class="gs-it s"><div class="gs-ic">🔮</div>사파이어</div>
+      <div class="gs-it g"><div class="gs-ic">⭐</div>금</div>
+    </div>
+
+    <button class="cta" id="adBtn">📺 광고 보고 보석 받기</button>
+    <button class="ghost" data-g="box">💎 보석함 확인</button>
+  </div>
+
+  <div class="nav">
+    <button class="act" data-g="mine"><i>⛏️</i>발굴</button>
+    <button data-g="box"><i>💎</i>보석함</button>
+    <button data-g="set"><i>⚙️</i>설정</button>
+  </div>
+
+  <div class="ad" id="mAd">
+    <div class="ad-bx"><h2>광고 시청 중...</h2><div class="ad-tm" id="mAdTm"><span id="mAdCt">3</span></div><p>끝까지 시청하면 보석이 지급됩니다</p></div>
+  </div>
+
+  <div class="toast" id="t1"></div>
+</section>
+
+<!-- ========== RESULT ========== -->
+<section class="screen" id="result">
+  <div class="st"><div class="st-l">9:41</div><div class="st-r"><span>●●●</span><span>100%</span></div></div>
+  <div class="hd">
+    <button style="color:rgba(255,255,255,.4);font-size:20px;font-weight:800" data-g="mine">←</button>
+    <h1 style="font-size:18px">보석 발견!</h1>
+    <div style="width:24px"></div>
+  </div>
+
+  <div class="r-h">
+    <div class="r-g"><span id="rEmoji">💎</span></div>
+    <div class="r-n" id="rName">다이아</div>
+    <div class="r-v" id="rVal">300만원</div>
+    <div class="r-hint">광고 시청 후 보석함에 저장됩니다</div>
+  </div>
+
+  <div style="padding:0 16px 16px">
+    <button class="cta" id="colBtn">📺 광고 보고 보석 받기</button>
+    <button class="ghost" data-g="mine">다시 돌깨기</button>
+  </div>
+
+  <div class="ad" id="rAd">
+    <div class="ad-bx"><h2>광고 시청 중...</h2><div class="ad-tm" id="rAdTm"><span id="rAdCt">3</span></div><p>끝까지 시청하면 보석이 저장됩니다</p></div>
+  </div>
+
+  <div class="toast" id="t2"></div>
+</section>
+
+<!-- ========== WALLET ========== -->
+<section class="screen" id="box">
+  <div class="st"><div class="st-l">9:41</div><div class="st-r"><span>●●●</span><span>100%</span></div></div>
+  <div class="hd">
+    <h1 style="font-size:18px">💎 내 보석함</h1>
+    <div class="hd-badge">목표 1억원</div>
+  </div>
+
+  <div class="ct">
+    <div class="ws">
+      <div class="ws-l">누적 보석 가치</div>
+      <div class="ws-v"><em id="wTotal">0</em>원</div>
+      <div class="ws-g" id="wGoal">보석을 모아 1억원을 달성하세요!</div>
+      <div class="ws-bar"><div class="ws-fl" id="wBar"></div></div>
+    </div>
+
+    <div class="gl" id="gList"></div>
+
+    <button class="cta" id="exBtn" disabled>토스포인트로 교환하기</button>
+    <button class="ghost" data-g="mine">⛏️ 돌 더 깨러가기</button>
+  </div>
+
+  <div class="nav">
+    <button data-g="mine"><i>⛏️</i>발굴</button>
+    <button class="act" data-g="box"><i>💎</i>보석함</button>
+    <button data-g="set"><i>⚙️</i>설정</button>
+  </div>
+
+  <div class="md" id="gMd">
+    <div class="md-c"><div class="burst">🎉</div><h2>1억원 달성!</h2><p>토스포인트 1,000원으로 교환하려면<br>광고를 한 번 시청해주세요.</p><button class="cta" id="mdEx">지금 교환하기</button></div>
+  </div>
+
+  <div class="ad" id="eAd">
+    <div class="ad-bx"><h2>교환 광고 시청 중...</h2><div class="ad-tm" id="eAdTm"><span id="eAdCt">3</span></div><p>광고 완료 후 교환이 처리됩니다</p></div>
+  </div>
+</section>
+
+<!-- ========== COMPLETE ========== -->
+<section class="screen" id="cp">
+  <div class="st"><div class="st-l">9:41</div><div class="st-r"><span>●●●</span><span>100%</span></div></div>
+  <div class="cp">
+    <div class="big">🎉</div>
+    <h2>교환 완료!</h2>
+    <p>토스포인트 1,000원 교환이<br>완료되었습니다.</p>
+    <div style="margin:6px 0">
+      <div class="r-g" style="width:72px;height:72px;font-size:36px;margin:0 auto"><span>💎</span></div>
+      <div class="cp-s" style="margin-top:6px">기념 다이아 선물</div>
+      <p style="font-size:11px;color:rgba(255,255,255,.25)">다음 라운드를 시작해보세요!</p>
+    </div>
+    <div style="width:100%"><button class="cta" data-g="box">보석함 확인하기</button><button class="ghost" data-g="mine">계속하기</button></div>
+  </div>
+</section>
+
+<!-- ========== SETTINGS ========== -->
+<section class="screen" id="set">
+  <div class="st"><div class="st-l">9:41</div><div class="st-r"><span>●●●</span><span>100%</span></div></div>
+  <div class="hd"><h1 style="font-size:18px">⚙️ 설정</h1></div>
+  <div class="ct">
+    <div class="gl">
+      <div class="gi"><div><strong>하루 기본 돌</strong><span style="font-size:10px;color:rgba(255,255,255,.25)">5개</span></div><span style="color:rgba(255,255,255,.2);font-size:11px">변경 가능</span></div>
+      <div class="gi"><div><strong>교환 기준</strong><span style="font-size:10px;color:rgba(255,255,255,.25)">1억원 → 토스포인트 1,000원</span></div><span style="color:rgba(255,255,255,.2);font-size:11px">변경 가능</span></div>
+      <div class="gi"><div><strong>보석 가격</strong><span style="font-size:10px;color:rgba(255,255,255,.25)">다이아300/에메랄드200/사파이어100/루비50/금20만원</span></div><span style="color:rgba(255,255,255,.2);font-size:11px">고정</span></div>
+      <div class="gi"><div><strong>광고 위치</strong><span style="font-size:10px;color:rgba(255,255,255,.25)">보석받기 / 교환하기</span></div><span style="color:rgba(255,255,255,.2);font-size:11px">변경 가능</span></div>
+      <div class="gi"><div><strong>기념 보상</strong><span style="font-size:10px;color:rgba(255,255,255,.25)">다이아 1개</span></div><span style="color:rgba(255,255,255,.4);font-size:11px">ON</span></div>
+    </div>
+    <button class="cta" data-g="mine">메인으로 돌아가기</button>
+  </div>
+  <div class="nav">
+    <button data-g="mine"><i>⛏️</i>발굴</button>
+    <button data-g="box"><i>💎</i>보석함</button>
+    <button class="act" data-g="set"><i>⚙️</i>설정</button>
+  </div>
+</section>
+
+</div>
+
+<script>
+const GEMS=[
+  {n:'다이아',e:'💎',v:300,r:5,c:'#4fc3f7'},
+  {n:'에메랄드',e:'🟢',v:200,r:8,c:'#388e3c'},
+  {n:'사파이어',e:'🔮',v:100,r:17,c:'#7b1fa2'},
+  {n:'루비',e:'❤️',v:50,r:30,c:'#d32f2f'},
+  {n:'금',e:'⭐',v:20,r:40,c:'#f9a825'}
+];
+const S={
+  cr:1,tr:5,bp:0,hc:0,tv:0,
+  inv:{다이아:0,에메랄드:0,사파이어:0,루비:1,금:3},
+  an:false
+};
+
+const $=id=>document.getElementById(id);
+const qs=(s,c=document)=>c.querySelector(s);
+const qsa=(s,c=document)=>[...c.querySelectorAll(s)];
+
+function go(id){
+  qsa('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  if(id==='box') rW();
+}
+
+function mv(v){
+  if(v>=10000) return `${Math.floor(v/10000)}억 ${(v%10000).toLocaleString()}만원`;
+  return `${v.toLocaleString()}만원`;
+}
+
+function ts(m,id='t1'){
+  const e=$(id);if(!e)return;
+  e.textContent=m;e.classList.remove('s');void e.offsetWidth;e.classList.add('s');
+}
+
+function pk(){
+  let r=Math.random()*100,a=0;
+  for(const g of GEMS){a+=g.rate;if(r<=a)return g}
+  return GEMS[4];
+}
+
+function rRd(){
+  const c=$('rd');c.innerHTML='';
+  for(let i=0;i<S.tr;i++){
+    const d=document.createElement('div');d.className='rd';
+    if(i<S.cr-1)d.classList.add('d');
+    else if(i===S.cr-1)d.classList.add('a');
+    c.appendChild(d);
+  }
+}
+
+function ht(){
+  if(S.an||S.cr>S.tr||S.bp>=100)return;
+  S.an=true;
+
+  const hm=$('hmr');hm.classList.remove('swing');void hm.offsetWidth;hm.classList.add('swing');
+  const rk=$('rk');rk.classList.remove('shk');void rk.offsetWidth;rk.classList.add('shk');
+
+  const ip=$('imp');ip.classList.remove('on','off');void ip.offsetWidth;
+  ip.classList.add('on');setTimeout(()=>{ip.classList.remove('on');ip.classList.add('off')},50);
+
+  sp();
+
+  S.hc++;let inc=8+Math.floor(Math.random()*10);
+  if(S.hc<=3)inc+=5;
+  S.bp=Math.min(100,S.bp+inc);
+  uC();
+  $('bf').style.width=S.bp+'%';
+  $('bp').textContent=S.bp+'%';
+
+  if(S.bp>=25&&S.bp-inc<25)fG(2);
+  if(S.bp>=50&&S.bp-inc<50)fG(3);
+  if(S.bp>=75&&S.bp-inc<75)fG(4);
+
+  setTimeout(()=>{S.an=false},180);
+
+  if(S.bp>=100)setTimeout(()=>bR(),300);
+}
+
+function uC(){
+  const c=qsa('.rk-crk');
+  const t=[20,35,50,65,80];
+  c.forEach((c,i)=>{const th=t[i]||90;c.setAttribute('opacity',S.bp>=th?'0.75':'0')});
+}
+
+function sp(){
+  const c=$('pt');
+  for(let i=0;i<6;i++){
+    const p=document.createElement('div');
+    p.style.cssText=`position:absolute;width:${3+Math.random()*4}px;height:${3+Math.random()*4}px;border-radius:50%;background:${['#ffd54f','#4fc3f7','#388e3c','#d32f2f','#7b1fa2','#f9a825'][i]};left:${38+Math.random()*24}%;top:${38+Math.random()*24}%;opacity:0;animation:pfly .5s ease forwards;--px:${(Math.random()>0.5?1:-1)*(30+Math.random()*60)}px;--py:${(Math.random()>0.5?1:-1)*(30+Math.random()*60)}px;--ps:${.6+Math.random()*.8}`;
+    c.appendChild(p);
+    setTimeout(()=>p.remove(),600);
+  }
+}
+
+function fG(n){
+  const g=qsa('.fg');
+  [...g].sort(()=>Math.random()-.5).slice(0,n).forEach(g=>g.classList.add('sh'));
+  setTimeout(()=>g.forEach(g=>g.classList.remove('sh')),700);
+}
+
+function bR(){
+  const f=pk();
+  S.inv[f.n]=(S.inv[f.n]||0)+1;
+  S.tv+=f.v;
+  $('hdCoin').textContent=mv(S.tv);
+  $('rEmoji').textContent=f.e;
+  $('rName').textContent=f.n;
+  $('rVal').textContent=mv(f.v);
+  go('result');
+
+  S.cr++;S.bp=0;S.hc=0;
+  $('bf').style.width='0%';$('bp').textContent='0%';
+  uC();$('cr').textContent=Math.min(S.cr,S.tr);
+  rRd();
+}
+
+function rAd(oid,cid,tid,cb){
+  const o=$(oid),ce=$(cid);
+  o.classList.add('s');let l=3;ce.textContent=l;o.style.setProperty('--ap','0%');
+  const iv=setInterval(()=>{l--;ce.textContent=Math.max(0,l);o.style.setProperty('--ap',((3-l)/3*100)+'%');if(l<=0){clearInterval(iv);o.classList.remove('s');cb()}},850);
+}
+
+function colG(){
+  rAd('rAd','rAdCt','rAdTm',()=>{
+    ts('보석함에 저장되었어요!','t2');
+    setTimeout(()=>{rW();go('box')},500);
+  });
+}
+
+function rW(){
+  $('wTotal').textContent=mv(S.tv);
+  $('wGoal').textContent=S.tv>=10000?'🎉 1억원 달성! 교환 가능합니다!':`보석을 모아 1억원을 달성하세요! (${mv(10000-S.tv)} 남음)`;
+  $('wBar').style.width=Math.min(100,(S.tv/10000)*100)+'%';
+  $('exBtn').disabled=S.tv<10000;
+  const l=$('gList');l.innerHTML='';
+  GEMS.forEach(g=>{
+    const n=S.inv[g.n]||0;if(!n)return;
+    const i=document.createElement('div');i.className='gi';
+    i.innerHTML=`<div class="gi-l"><div class="gi-b" style="background:rgba(${hr(g.c)},.12)">${g.e}</div><div class="gi-t"><strong>${g.n} ${n}개</strong><span>${g.v}만원 · 확률 ${g.r}%</span></div></div><div class="gi-v">${mv(n*g.v)}</div>`;
+    l.appendChild(i);
+  });
+}
+
+function hr(h){const r=parseInt(h.slice(1,2),16)*17;const g=parseInt(h.slice(2,3),16)*17;const b=parseInt(h.slice(3,4),16)*17;return `${r},${g},${b}`}
+
+// Events
+$('rk').addEventListener('click',ht);
+
+qsa('[data-g]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.g)));
+
+$('adBtn').addEventListener('click',()=>{
+  rAd('mAd','mAdCt','mAdTm',()=>{
+    const g=pk();S.inv[g.n]=(S.inv[g.n]||0)+1;S.tv+=g.v;
+    $('hdCoin').textContent=mv(S.tv);ts(`✨ ${g.n}을(를) 얻었어요!`);
+  });
+});
+
+$('colBtn').addEventListener('click',colG);
+
+$('exBtn').addEventListener('click',()=>{if(S.tv>=10000)$('gMd').classList.add('s')});
+$('mdEx').addEventListener('click',()=>{
+  $('gMd').classList.remove('s');
+  rAd('eAd','eAdCt','eAdTm',()=>{S.tv-=10000;S.inv.다이아=(S.inv.다이아||0)+1;go('cp')});
+});
+
+rRd();$('cr').textContent=S.cr;$('tr').textContent=S.tr;
+</script>
 </body>
 </html>
