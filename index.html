@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>앱인토스 보석 발굴 인터랙티브 목업</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{min-height:100vh;background:#e9edf5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;color:#182033;display:flex;align-items:center;justify-content:center;padding:28px}
+    button{font:inherit;border:0;cursor:pointer}
+    .wrap{width:1180px;display:grid;grid-template-columns:390px 1fr;gap:28px;align-items:start}
+    .phone{width:390px;height:844px;background:#f6f8fc;border:12px solid #111827;border-radius:44px;box-shadow:0 28px 80px rgba(17,24,39,.35);overflow:hidden;position:sticky;top:24px}
+    .screen{height:100%;display:none;flex-direction:column;position:relative;background:linear-gradient(180deg,#eef6ff 0%,#f7f9fd 48%,#fff 100%)}
+    .screen.active{display:flex}
+    .status{height:32px;padding:8px 22px 0;display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#111827}
+    .top{padding:10px 22px 0;display:flex;align-items:center;justify-content:space-between}
+    .title{font-size:22px;font-weight:900;letter-spacing:-.8px;color:#101828}
+    .sub{font-size:13px;color:#667085;margin-top:4px;line-height:1.35}
+    .pill{border-radius:999px;background:#fff;padding:8px 12px;box-shadow:0 8px 22px rgba(34,66,120,.08);font-size:13px;font-weight:800;color:#2563eb}
+    .content{flex:1;padding:18px 22px 22px;display:flex;flex-direction:column;gap:16px}
+    .card{background:rgba(255,255,255,.92);border:1px solid rgba(207,216,232,.9);border-radius:26px;box-shadow:0 16px 36px rgba(30,64,175,.08)}
+    .hero{padding:18px;text-align:center;min-height:392px;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 35%,#fff7ed 0,#fef3c7 23%,#e0f2fe 53%,#fff 100%)}
+    .daily{display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:10px}
+    .stone-stage{height:220px;display:flex;align-items:center;justify-content:center;position:relative}
+    .stone{width:158px;height:132px;border-radius:48% 52% 44% 56%;background:linear-gradient(145deg,#a3aab8,#707988 55%,#4b5563);box-shadow:inset -24px -18px 28px rgba(0,0,0,.25),inset 18px 14px 24px rgba(255,255,255,.25),0 20px 34px rgba(31,41,55,.24);transform:scale(var(--stone-scale,1));transition:.35s ease;position:relative}
+    .stone:before,.stone:after{content:"";position:absolute;background:rgba(255,255,255,.35);border-radius:999px;transform:rotate(-18deg)}
+    .stone:before{width:52px;height:13px;left:32px;top:26px}.stone:after{width:28px;height:9px;left:92px;top:52px}
+    .crack{position:absolute;inset:0;opacity:var(--crack-opacity,0);transition:.25s}.crack:before{content:"";position:absolute;left:72px;top:14px;width:4px;height:106px;background:#111827;clip-path:polygon(0 0,100% 0,38% 26%,100% 26%,20% 54%,100% 54%,34% 78%,70% 78%,0 100%)}
+    .hammer{position:absolute;top:5px;left:160px;width:74px;height:74px;transform-origin:20px 58px;transition:.12s}.hammer.hit{animation:hit .34s ease-in-out}.hammer .head{width:48px;height:28px;background:#64748b;border-radius:8px;transform:rotate(-20deg);box-shadow:inset -8px -6px 0 rgba(0,0,0,.12)}.hammer .handle{width:14px;height:58px;background:#b7791f;border-radius:8px;transform:rotate(-35deg);position:absolute;left:18px;top:19px}
+    @keyframes hit{0%{transform:rotate(-28deg)}55%{transform:rotate(22deg) translate(5px,8px)}100%{transform:rotate(-12deg)}}
+    .progress-box{margin-top:8px}.progress-meta{display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:#344054;margin-bottom:8px}.bar{height:16px;border-radius:999px;background:#dbe7ff;overflow:hidden;box-shadow:inset 0 2px 4px rgba(30,64,175,.08)}.fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#60a5fa,#2563eb,#7c3aed);transition:.35s ease}
+    .primary{height:56px;border-radius:18px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:17px;font-weight:900;box-shadow:0 16px 28px rgba(37,99,235,.28)}
+    .primary:disabled{background:#cbd5e1;box-shadow:none;cursor:not-allowed}.ghost{height:48px;border-radius:16px;background:#eff6ff;color:#2563eb;font-size:15px;font-weight:900}.row{display:flex;gap:10px}.row>*{flex:1}
+    .gem-reveal{padding:24px;text-align:center;gap:16px;display:flex;flex-direction:column;align-items:center}.gem-icon{width:150px;height:150px;border-radius:42px;display:flex;align-items:center;justify-content:center;font-size:78px;background:linear-gradient(145deg,#dbeafe,#fff,#fef3c7);box-shadow:0 18px 42px rgba(37,99,235,.16)}.gem-name{font-size:26px;font-weight:950}.gem-value{font-size:18px;font-weight:900;color:#2563eb}
+    .ad{position:absolute;inset:0;background:rgba(15,23,42,.86);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:24px;z-index:5}.ad.show{display:flex}.ad-box{background:#fff;border-radius:28px;padding:24px;width:100%;text-align:center}.ad-timer{width:96px;height:96px;border-radius:50%;margin:16px auto;background:conic-gradient(#2563eb var(--ad-progress),#dbeafe 0);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:950;color:#1d4ed8}.ad small{color:#667085;line-height:1.45;display:block}
+    .jewel-list{display:flex;flex-direction:column;gap:10px}.jewel{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:18px}.jewel-left{display:flex;align-items:center;gap:12px}.jewel-emoji{font-size:28px}.jewel strong{display:block;font-size:15px}.jewel span{font-size:12px;color:#667085}.total{padding:18px;background:linear-gradient(135deg,#111827,#1d4ed8);color:#fff;border-radius:24px}.total .amount{font-size:28px;font-weight:950;margin-top:6px}.total .goal{font-size:13px;color:#dbeafe;margin-top:4px}.progress-thin{height:10px;background:rgba(255,255,255,.22);border-radius:999px;margin-top:14px;overflow:hidden}.progress-thin div{height:100%;width:0%;background:#facc15;border-radius:999px}
+    .modal{position:absolute;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;padding:22px;z-index:6}.modal.show{display:flex}.modal-card{background:#fff;border-radius:30px;padding:24px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(15,23,42,.3)}.modal-card h2{font-size:26px;letter-spacing:-.6px}.modal-card p{color:#667085;line-height:1.45;margin:10px 0 18px}.burst{font-size:70px;margin-bottom:8px}.complete{background:linear-gradient(180deg,#fef3c7 0,#fff 50%)}
+    .nav{height:72px;background:#fff;border-top:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-around}.nav button{background:transparent;color:#98a2b3;font-size:12px;font-weight:800;display:flex;flex-direction:column;gap:4px;align-items:center}.nav button.active{color:#2563eb}.nav i{font-style:normal;font-size:22px}
+    .panel{background:#fff;border:1px solid #d7deea;border-radius:28px;padding:24px;box-shadow:0 22px 70px rgba(15,23,42,.1)}.panel h1{font-size:28px;margin-bottom:8px}.panel p{color:#667085;line-height:1.55}.steps{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}.step{padding:16px;border-radius:20px;background:#f8fafc;border:1px solid #e5e7eb}.step strong{display:block;margin-bottom:6px}.step span{font-size:13px;color:#667085;line-height:1.45}.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.control{padding:11px 14px;border-radius:14px;background:#111827;color:#fff;font-weight:800}.control.secondary{background:#e0e7ff;color:#3730a3}.note{margin-top:20px;padding:16px;border-radius:18px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:14px;line-height:1.5}
+    .toast{position:absolute;left:22px;right:22px;bottom:86px;background:#111827;color:#fff;border-radius:18px;padding:14px 16px;font-size:14px;font-weight:800;display:none;z-index:8}.toast.show{display:block;animation:toast 2s ease forwards}@keyframes toast{0%{opacity:0;transform:translateY(10px)}12%,80%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(8px)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="phone">
+      <section class="screen active" id="mine">
+        <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="top"><div><div class="title">보석 발굴</div><div class="sub">돌을 깨서 보석을 모아보세요</div></div><div class="pill">오늘 <b id="rocksLeft">5</b>개</div></div>
+        <div class="content">
+          <div class="card hero">
+            <div class="daily"><span>💎</span><b>1억원까지 보석 모으기</b></div>
+            <div class="stone-stage">
+              <div class="hammer" id="hammer"><div class="head"></div><div class="handle"></div></div>
+              <div class="stone" id="stone"><div class="crack"></div></div>
+            </div>
+            <div class="progress-box">
+              <div class="progress-meta"><span>돌 깨는 중</span><span id="progressText">0%</span></div>
+              <div class="bar"><div class="fill" id="fill"></div></div>
+            </div>
+          </div>
+          <button class="primary" id="tapBtn">돌 깨기</button>
+          <div class="row"><button class="ghost" data-go="box">보석함 보기</button><button class="ghost" id="resetBtn">다시 보기</button></div>
+        </div>
+        <div class="nav"><button class="active" data-go="mine"><i>⛏️</i>돌깨기</button><button data-go="box"><i>💼</i>보석함</button><button data-go="settings"><i>⚙️</i>설정</button></div>
+        <div class="toast" id="toast"></div>
+      </section>
+      <section class="screen" id="result">
+        <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="top"><div><div class="title">보석 발견!</div><div class="sub">광고 시청 후 보석함에 저장돼요</div></div></div>
+        <div class="content">
+          <div class="card gem-reveal"><div class="gem-icon" id="resultEmoji">💎</div><div><div class="gem-name" id="resultName">다이아</div><div class="gem-value" id="resultValue">400만원</div></div><p class="sub">전면광고를 끝까지 보면 보석함에 저장됩니다.</p></div>
+          <button class="primary" id="receiveGem">보석받기</button>
+          <button class="ghost" data-go="mine">돌깨기로 돌아가기</button>
+        </div>
+        <div class="ad" id="gemAd"><div class="ad-box"><h2>광고 시청 중</h2><div class="ad-timer" id="gemAdTimer">3</div><small>광고를 끝까지 시청하면 보석이 보석함에 저장됩니다.</small></div></div>
+      </section>
+      <section class="screen" id="box">
+        <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="top"><div><div class="title">내 보석함</div><div class="sub">1억원을 모으면 토스포인트로 바꿀 수 있어요</div></div><div class="pill">목표 1억원</div></div>
+        <div class="content">
+          <div class="total"><div>누적 보석 가치</div><div class="amount" id="totalAmount">9,680만원</div><div class="goal" id="goalText">320만원 더 모으면 교환 가능</div><div class="progress-thin"><div id="totalBar"></div></div></div>
+          <div class="jewel-list" id="jewelList"></div>
+          <button class="primary" id="exchangeBtn">교환하기</button>
+          <button class="ghost" data-go="mine">돌 더 깨러가기</button>
+        </div>
+        <div class="modal" id="goalModal"><div class="modal-card"><div class="burst">🎉</div><h2>1억원 달성!</h2><p>토스포인트 1,000원으로 바꿀 수 있어요. 교환 전 광고를 한 번 시청해주세요.</p><button class="primary" id="modalExchange">지금 교환하기</button></div></div>
+        <div class="ad" id="exchangeAd"><div class="ad-box"><h2>교환 광고 시청 중</h2><div class="ad-timer" id="exchangeAdTimer">3</div><small>광고 완료 후 토스포인트 교환이 처리됩니다.</small></div></div>
+      </section>
+      <section class="screen complete" id="complete">
+        <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="content" style="justify-content:center;text-align:center">
+          <div class="burst">🏆</div><div class="title">교환 완료!</div><p class="sub">토스포인트 1,000원으로 바꾸기가 완료됐어요.</p>
+          <div class="card gem-reveal"><div class="gem-icon">💎</div><div class="gem-name">기념 다이아 선물</div><div class="gem-value">1억원 달성 보상으로 다이아 1개 지급</div></div>
+          <button class="primary" data-go="box">보석함 확인하기</button><button class="ghost" data-go="mine">돌깨기 계속하기</button>
+        </div>
+      </section>
+      <section class="screen" id="settings">
+        <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="top"><div><div class="title">운영 설정</div><div class="sub">가격/확률/광고 조건은 운영값으로 조정</div></div></div>
+        <div class="content">
+          <div class="jewel-list"><div class="jewel"><div><strong>하루 기본 돌</strong><span>5개</span></div><b>변경 가능</b></div><div class="jewel"><div><strong>교환 기준</strong><span>1억원 → 토스포인트 1,000원</span></div><b>변경 가능</b></div><div class="jewel"><div><strong>광고 위치</strong><span>보석받기 / 교환하기</span></div><b>변경 가능</b></div><div class="jewel"><div><strong>기념 보상</strong><span>다이아 1개</span></div><b>ON</b></div></div>
+          <button class="primary" data-go="mine">목업으로 돌아가기</button>
+        </div>
+        <div class="nav"><button data-go="mine"><i>⛏️</i>돌깨기</button><button data-go="box"><i>💼</i>보석함</button><button class="active" data-go="settings"><i>⚙️</i>설정</button></div>
+      </section>
+    </main>
+    <aside class="panel">
+      <h1>보석 발굴 인터랙티브 목업</h1>
+      <p>Figma 링크는 현재 브라우저에서 CloudFront 403으로 열리지 않아, PRD와 현재 확정된 화면 구조를 기준으로 먼저 인터랙티브 목업을 제작했습니다. Figma 화면 캡처나 export 이미지를 주시면 색상/간격/톤을 기존 화면에 맞춰 다시 정렬할 수 있습니다.</p>
+      <div class="steps">
+        <div class="step"><strong>1. 돌 깨기</strong><span>탭할 때마다 5~15% 랜덤 증가, 망치와 돌 깨짐 애니메이션 확인</span></div>
+        <div class="step"><strong>2. 보석받기</strong><span>보석 발견 후 전면광고 완료 시 보석함 저장</span></div>
+        <div class="step"><strong>3. 보석함</strong><span>누적 가치, 1억원 도달 팝업, 교환 플로우 확인</span></div>
+        <div class="step"><strong>4. 교환 완료</strong><span>전면광고 후 토스포인트 교환, 기념 다이아 지급</span></div>
+      </div>
+      <div class="controls"><button class="control" onclick="demoGoal()">1억원 달성 상태 보기</button><button class="control secondary" onclick="go('mine')">처음부터 체험</button><button class="control secondary" onclick="go('settings')">운영 설정 보기</button></div>
+      <div class="note">다음 단계: 이 HTML을 Figma에 editable layer로 옮기려면 html.to.design 같은 플러그인에 로컬/배포 URL을 넣어 import하면 됩니다. 기존 Figma 톤 반영을 위해서는 현재 제작된 화면의 스크린샷이 필요합니다.</div>
+    </aside>
+  </div>
+  <script>
+    const gems=[{name:'다이아',emoji:'💎',value:400,rate:5},{name:'에메랄드',emoji:'🟩',value:250,rate:8},{name:'사파이어',emoji:'🔷',value:120,rate:17},{name:'루비',emoji:'❤️',value:50,rate:30},{name:'금',emoji:'🟨',value:20,rate:40}]
+    let progress=0, rocksLeft=5, total=9680, inventory={다이아:0,에메랄드:1,사파이어:3,루비:5,금:16}, pending=gems[4]
+    const $=id=>document.getElementById(id)
+    function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');if(id==='box')renderBox()}
+    function money(v){return v>=10000?`${Math.floor(v/10000)}억${v%10000?` ${(v%10000).toLocaleString()}만원`:''}`:`${v.toLocaleString()}만원`}
+    function pickGem(){let r=Math.random()*100,acc=0;for(const g of gems){acc+=g.rate;if(r<=acc)return g}return gems[4]}
+    function setProgress(v){progress=Math.min(100,v);$('progressText').textContent=`${progress}%`;$('fill').style.width=`${progress}%`;$('stone').style.setProperty('--stone-scale',1-progress/380);$('stone').style.setProperty('--crack-opacity',progress/100)}
+    function toast(t){$('toast').textContent=t;$('toast').classList.remove('show');void $('toast').offsetWidth;$('toast').classList.add('show')}
+    function renderBox(){const list=$('jewelList');list.innerHTML='';gems.forEach(g=>{const n=inventory[g.name]||0;const row=document.createElement('div');row.className='jewel';row.innerHTML=`<div class="jewel-left"><div class="jewel-emoji">${g.emoji}</div><div><strong>${g.name} ${n}개</strong><span>${g.value}만원 · ${g.rate}%</span></div></div><b>${money(n*g.value)}</b>`;list.appendChild(row)});$('totalAmount').textContent=money(total);$('goalText').textContent=total>=10000?'교환 가능: 토스포인트 1,000원':`${money(10000-total)} 더 모으면 교환 가능`;$('totalBar').style.width=`${Math.min(100,total/10000*100)}%`;$('exchangeBtn').disabled=total<10000;if(total>=10000)setTimeout(()=>$('goalModal').classList.add('show'),280)}
+    function runAd(adId,timerId,next){$(adId).classList.add('show');let left=3;$(timerId).textContent=left;$(timerId).style.setProperty('--ad-progress','0%');const timer=setInterval(()=>{left--;$(timerId).textContent=Math.max(0,left);$(timerId).style.setProperty('--ad-progress',`${(3-left)/3*100}%`);if(left<=0){clearInterval(timer);$(adId).classList.remove('show');next()}},850)}
+    function demoGoal(){total=10080;renderBox();go('box')}
+    $('tapBtn').onclick=()=>{if(rocksLeft<=0){toast('오늘 깰 수 있는 돌을 모두 사용했어요');return}const h=$('hammer');h.classList.remove('hit');void h.offsetWidth;h.classList.add('hit');setProgress(progress+Math.floor(5+Math.random()*11));if(progress>=100){rocksLeft--;$('rocksLeft').textContent=rocksLeft;pending=pickGem();$('resultEmoji').textContent=pending.emoji;$('resultName').textContent=pending.name;$('resultValue').textContent=`${pending.value}만원`;setTimeout(()=>go('result'),480)}}
+    $('resetBtn').onclick=()=>{setProgress(0);toast('진행률이 0%로 초기화됐어요')}
+    $('receiveGem').onclick=()=>runAd('gemAd','gemAdTimer',()=>{inventory[pending.name]=(inventory[pending.name]||0)+1;total+=pending.value;setProgress(0);go('box');toast(`${pending.name}이 보석함에 저장됐어요`)})
+    $('exchangeBtn').onclick=()=>{$('goalModal').classList.add('show')}
+    $('modalExchange').onclick=()=>{$('goalModal').classList.remove('show');runAd('exchangeAd','exchangeAdTimer',()=>{if(total>=10000)total-=10000;inventory.다이아=(inventory.다이아||0)+1;go('complete')})}
+    document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go))
+    renderBox();setProgress(0)
+  </script>
+</body>
+</html>
