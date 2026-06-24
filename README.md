@@ -4,9 +4,10 @@
 
 ## 보기
 
-- 바로 보기: https://raw.githack.com/chj8750/jewels/main/index.html
+- 바로 보기: https://htmlpreview.github.io/?https://github.com/chj8750/jewels/blob/main/index.html
 - GitHub Pages: https://chj8750.github.io/jewels/  
   - GitHub Pages는 repo Settings에서 Pages를 GitHub Actions로 활성화해야 동작합니다.
+- 참고: 기존 raw.githack 링크는 Cloudflare 403이 발생할 수 있어 htmlpreview 링크로 교체했습니다.
 - 로컬 실행: `open index.html`
 
 ## 포함된 문서
